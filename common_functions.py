@@ -1,9 +1,6 @@
-from pydantic import BaseModel
-
-
-class ClientInput(BaseModel):
-    id: int
-
+from pydantic import BaseModel, Field
+import pandas as pd
+from __future__ import annotations
 
 class Prediction(BaseModel):
     pred: float
@@ -19,7 +16,8 @@ class ClassifierAPI:
         return output
 
     def explain(self, data: pd.DataFrame):
-        context = self.explainer.explain_instance(data.values.T[0], self.model.predict, num_features=len(data.columns))
+        context = self.explainer.explain_instance(data.values.T[0], self.model.predict_proba,
+                                                  num_features=20)
         return context
 
 
