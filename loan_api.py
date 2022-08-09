@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import dill
 import pandas as pd
 import uvicorn
@@ -23,6 +24,17 @@ feats = ['DAYS_BIRTH', 'DAYS_EMPLOYED', 'REGION_RATING_CLIENT',
          'PREV_NAME_CONTRACT_STATUS_Refused_MEAN',
          'PREV_CODE_REJECT_REASON_XAP_MEAN', 'PREV_NAME_PRODUCT_TYPE_walk-in_MEAN',
          'CC_CNT_DRAWINGS_ATM_CURRENT_MEAN', 'CC_CNT_DRAWINGS_CURRENT_MAX']
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 
 class ClientInput(BaseModel):
@@ -85,6 +97,19 @@ async def give_context(data: ClientInput):
     graph.savefig(buf, format="png")
     buf.seek(0)
     return StreamingResponse(buf, media_type="image/png")
+
+
+@app.post('/context_map')
+async def give_context(data: ClientInput):
+    data_dict = jsonable_encoder(data)
+    for key, value in data_dict.items():
+        data_dict[key] = [value]
+    df_input = pd.DataFrame.from_dict(data_dict)
+    print(df_input)
+    context = clf.explain(df_input.T)
+    map_context = dict(context.as_map())
+    print(map_context)
+    return json.dumps(map_context, cls=NpEncoder)
 
 
 if __name__ == '__main__':
