@@ -84,21 +84,6 @@ async def predict_outcome(data: ClientInput):
     return json.dumps(prediction.tolist())
 
 
-@app.post('/context')
-async def give_context(data: ClientInput):
-    data_dict = jsonable_encoder(data)
-    for key, value in data_dict.items():
-        data_dict[key] = [value]
-    df_input = pd.DataFrame.from_dict(data_dict)
-    print(df_input)
-    context = clf.explain(df_input.T)
-    graph = context.as_pyplot_figure()
-    buf = BytesIO()
-    graph.savefig(buf, format="png")
-    buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png")
-
-
 @app.post('/context_map')
 async def give_context(data: ClientInput):
     data_dict = jsonable_encoder(data)
