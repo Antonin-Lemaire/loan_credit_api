@@ -17,17 +17,17 @@ Procfile is used to launch the server in Heroku.
 You will need requirements.txt, loan_api.py, common_functions.py and api_model.pkl.
 
 First install all required libraries in python console with :
-
+```bash
 pip install -r requirements.txt
-
+```
 Then run in system console "loan_api.py" with :
-
+```bash
 python3 loan_api.py
-
+```
 The default local address is 127.0.0.1/8000/, though you can modify it in the source file by changing the parameters in
-
+```bash
 uvicorn.run(app, host='127.0.0.1', port=8000)
-
+```
 
 ## General usage requests
 
