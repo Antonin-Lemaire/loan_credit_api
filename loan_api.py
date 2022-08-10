@@ -64,10 +64,6 @@ class ClientInput(BaseModel):
     CC_CNT_DRAWINGS_CURRENT_MAX: float
 
 
-class Prediction(BaseModel):
-    pred: float
-
-
 @app.get('/')
 def index():
     return {'message': 'Loan default prediction model'}
@@ -90,10 +86,8 @@ async def give_context(data: ClientInput):
     for key, value in data_dict.items():
         data_dict[key] = [value]
     df_input = pd.DataFrame.from_dict(data_dict)
-    print(df_input)
     context = clf.explain(df_input.T)
     map_context = dict(context.as_map())
-    print(map_context)
     return json.dumps(map_context, cls=NpEncoder)
 
 
