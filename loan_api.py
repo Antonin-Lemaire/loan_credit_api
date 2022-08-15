@@ -11,7 +11,7 @@ from starlette.responses import StreamingResponse
 
 app = FastAPI()
 
-df = pd.read_csv('test.csv')
+df = pd.read_csv('test.csv').drop(columns=['Unnamed: 0'])
 
 
 with open('api_model.pkl', 'rb') as pickle_in:
@@ -75,14 +75,15 @@ def index():
 @app.get('/base_info/')
 async def information(client_id: int):
     client_data = df.loc[client_id, :]
-    return json.dumps(client_data.to_dict())
+    return client_data.to_dict()
 
 
 @app.get('/pred_in_browser/')
 async def browser_pred(client_id: int):
-    client_data = df.loc[client_id, :]
+    client_data = df[df.index == client_id]
     prediction_base = clf.predict(client_data)
-    return json.dumps(prediction_base)
+    return {'probability of honoring the loan': prediction_base[0][0],
+            'probability of defaulting': prediction_base[0][1]}
 
 
 @app.post('/predict')
