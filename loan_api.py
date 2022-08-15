@@ -11,6 +11,9 @@ from starlette.responses import StreamingResponse
 
 app = FastAPI()
 
+df = pd.read_csv('test.csv')
+
+
 with open('api_model.pkl', 'rb') as pickle_in:
     clf = dill.load(pickle_in)
 print('loading model complete')
@@ -67,6 +70,19 @@ class ClientInput(BaseModel):
 @app.get('/')
 def index():
     return {'message': 'Loan default prediction model'}
+
+
+@app.get('/base_info/')
+async def information(client_id: int):
+    client_data = df.loc[client_id, :]
+    return json.dumps(client_data.to_dict())
+
+
+@app.get('/pred_in_browser/')
+async def browser_pred(client_id: int):
+    client_data = df.loc[client_id, :]
+    prediction_base = clf.predict(client_data)
+    return json.dumps(prediction_base)
 
 
 @app.post('/predict')
